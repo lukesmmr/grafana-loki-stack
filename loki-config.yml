@@ -8,11 +8,11 @@ distributor:
       store: memberlist   # <--- Instead of consul
 
 ingester:
-  replication_factor: 1
   wal:
     enabled: true
     dir: /loki/wal  # <--- subdirectory of /loki
   lifecycler:
+    replication_factor: 1
     ring:
       kvstore:
         store: memberlist # <--- Instead of consul
