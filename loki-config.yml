@@ -2,11 +2,16 @@ server:
   http_listen_port: 3100
   log_level: info
 
+# The distributor will route log writes to ingesters. We set min_ingesters=1 so it doesn't expect 2.
 distributor:
+  shard_by_all_labels: false   # recommended for single-node
+  pool:
+    min_ingesters: 1           # <--- Key to avoiding "2 live replicas required"
   ring:
     kvstore:
-      store: memberlist   # <--- Instead of consul
+      store: inmemory
 
+# The ingester actually stores log chunks and can use a WAL if desired.
 ingester:
   wal:
     enabled: true
@@ -19,27 +24,37 @@ ingester:
   max_chunk_age: 1h
   chunk_retain_period: 30s
   max_transfer_retries: 0
+  lifecycler:
+    join_after: 0s
+    observe_period: 0s
+    final_sleep: 0s
+    ring:
+      kvstore:
+        store: inmemory
 
+# Where queries are executed
 querier:
   engine:
-    max_look_back_period: 168h
+    max_look_back_period: 168h  # 7 days
 
+# For range queries
 query_range:
   cache_results: true
 
-# If you don't need the compactor, you can disable it
-# or point it to a local filesystem directory:
+# If you don't need the compactor or retention, you can set these to minimal defaults
 compactor:
   shared_store: filesystem
   working_directory: /loki/compactor
+  compaction_interval: 0s
   retention_enabled: false
-  compaction_interval: 5m
 
+# Important limits, including ingestion rate if needed
 limits_config:
-  replication_factor: 1
   reject_old_samples: true
   reject_old_samples_max_age: 168h
+  # Adjust more advanced limits here if desired
 
+# The schema and store config for boltdb-shipper + filesystem
 schema_config:
   configs:
     - from: 2023-01-01
@@ -58,6 +73,6 @@ storage_config:
   filesystem:
     directory: /loki/chunks
 
-# Memberlist config for single-node or small clusters (no consul or etcd needed)
+# We are a single-node ring, so no need to join any peers
 memberlist:
   join_members: []
