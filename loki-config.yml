@@ -2,8 +2,10 @@ server:
   http_listen_port: 3100
   log_level: info
 
-distributor:
+common:
   auth_enabled: false
+
+distributor:
   ring:
     kvstore:
       store: memberlist   # <--- Instead of consul
