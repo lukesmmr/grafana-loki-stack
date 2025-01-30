@@ -5,12 +5,20 @@ server:
 distributor:
   ring:
     kvstore:
-      store: inmemory
+      store: memberlist   # <--- Instead of consul
 
 ingester:
   wal:
     enabled: true
     dir: /loki/wal  # <--- subdirectory of /loki
+  lifecycler:
+    ring:
+      kvstore:
+        store: memberlist # <--- Instead of consul
+  chunk_idle_period: 5m
+  max_chunk_age: 1h
+  chunk_retain_period: 30s
+  max_transfer_retries: 0
 
 querier:
   engine:
@@ -18,6 +26,14 @@ querier:
 
 query_range:
   cache_results: true
+
+# If you don't need the compactor, you can disable it
+# or point it to a local filesystem directory:
+compactor:
+  shared_store: filesystem
+  working_directory: /loki/compactor
+  retention_enabled: false
+  compaction_interval: 5m
 
 limits_config:
   reject_old_samples: true
@@ -41,8 +57,6 @@ storage_config:
   filesystem:
     directory: /loki/chunks
 
-compactor:
-  shared_store: filesystem
-  working_directory: /loki/compactor  # <--- also inside /loki
-  compaction_interval: 5m
-  retention_enabled: false
+# Memberlist config for single-node or small clusters (no consul or etcd needed)
+memberlist:
+  join_members: []
