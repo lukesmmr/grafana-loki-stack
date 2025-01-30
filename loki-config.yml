@@ -36,7 +36,10 @@ compactor:
   compaction_interval: 5m
 
 limits_config:
-  replication_factor: 1
+  # These two lines are crucial for single-node setups,
+  # so you don't get "at least 2 live replicas required".
+  min_write_replicas: 1
+  min_read_replicas: 1
   reject_old_samples: true
   reject_old_samples_max_age: 168h
 
