@@ -1,26 +1,27 @@
 target: all  # crucial for single-process mode
 
-common:
-  path_prefix: /loki
-  replication_factor: 1
-
 server:
   http_listen_port: 3100
   log_level: info
 
+common:
+  path_prefix: /loki
+  replication_factor: 1
+
 distributor:
   ring:
     kvstore:
-      store: inmemory
+      store: memberlist
 
 ingester:
+  # Optional Write-Ahead Log (WAL)
   wal:
     enabled: true
     dir: /loki/wal
   lifecycler:
     ring:
       kvstore:
-        store: inmemory
+        store: memberlist
   chunk_idle_period: 5m
   max_chunk_age: 1h
   chunk_retain_period: 30s
@@ -60,3 +61,7 @@ storage_config:
     cache_location: /loki/cache
   filesystem:
     directory: /loki/chunks
+
+# Single-node "ring" with no external cluster
+memberlist:
+  join_members: []
