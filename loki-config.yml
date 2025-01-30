@@ -14,12 +14,7 @@ distributor:
 # The ingester actually stores log chunks and can use a WAL if desired.
 ingester:
   wal:
-    enabled: true
-    dir: /loki/wal  # <--- subdirectory of /loki
-  lifecycler:
-    ring:
-      kvstore:
-        store: memberlist # <--- Instead of consul
+    enabled: false
   chunk_idle_period: 5m
   max_chunk_age: 1h
   chunk_retain_period: 30s
