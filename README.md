@@ -77,7 +77,7 @@ cd loki-stack
 3. **Spin up the stack**:
 
 ```bash
-docker-compose up -d
+docker compose -f docker-compose.loki.yml up -d
 ```
 
 This brings up **Loki**, **Promtail**, and **Grafana** in the background.
@@ -186,3 +186,4 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
 - **Promtail** and **Grafana** are also open source under permissive licenses.
 
 Feel free to modify and use this stack in your own production or staging environments!
+
