@@ -19,17 +19,11 @@ ingester:
   max_transfer_retries: 0
 
 querier:
-  query_store_after: 24h
   engine:
-    max_look_back_period: 168h  # 7 days
+    max_look_back_period: 168h
 
 query_range:
   cache_results: true
-
-store:
-  store: filesystem
-  filesystem:
-    directory: /loki
 
 limits_config:
   max_cache_freshness_per_query: 10m
@@ -39,9 +33,18 @@ limits_config:
 schema_config:
   configs:
     - from: 2022-01-01
-      store: filesystem
+      store: boltdb-shipper
       object_store: filesystem
       schema: v12
       index:
         prefix: index_
         period: 24h
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /loki/index
+    shared_store: filesystem
+    cache_location: /loki/cache
+
+  filesystem:
+    directory: /loki/chunks
