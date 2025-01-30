@@ -6,8 +6,10 @@ distributor:
   ring:
     kvstore:
       store: memberlist   # <--- Instead of consul
+  replication_factor: 1  # <--- only 1 replica needed
 
 ingester:
+  replication_factor: 1  # <--- only 1 replica needed
   wal:
     enabled: true
     dir: /loki/wal  # <--- subdirectory of /loki
