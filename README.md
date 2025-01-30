@@ -13,7 +13,7 @@ You’ll be able to **view** and **query** these logs through **Grafana** in a w
 
 ```
 loki-stack/
-├── docker-compose.yml      # Main Docker Compose file for Loki, Promtail, Grafana
+├── docker-compose.loki.yml      # Main Docker Compose file for Loki, Promtail, Grafana
 ├── loki-config.yml         # Loki's configuration (in-memory ring, filesystem storage, etc.)
 ├── promtail-config.yml     # Promtail's configuration (scrape caddy logs + docker logs)
 └── README.md               # This documentation
@@ -86,7 +86,7 @@ This brings up **Loki**, **Promtail**, and **Grafana** in the background.
 
 ## 4. File-by-File Explanation
 
-### 4.1 `docker-compose.yml`
+### 4.1 `docker-compose.loki.yml`
 
 - **Loki** listens on `3100`, storing data in `loki_data` volume.
 - **Promtail** reads logs:
@@ -130,7 +130,7 @@ You can either:
 
 - **Keep the Loki stack** separate, starting it manually:
   ```bash
-  docker-compose -f docker-compose.yml up -d
+  docker-compose -f docker-compose.loki.yml up -d
   ```
 - **Integrate** it into your existing Compose setup if you want a unified `docker-compose up -d`.
 
