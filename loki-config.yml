@@ -2,9 +2,6 @@ server:
   http_listen_port: 3100
   log_level: info
 
-common:
-  auth_enabled: false
-
 distributor:
   ring:
     kvstore:
