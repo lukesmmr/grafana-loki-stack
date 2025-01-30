@@ -8,15 +8,9 @@ distributor:
       store: inmemory
 
 ingester:
-  lifecycler:
-    address: 127.0.0.1
-    ring:
-      kvstore:
-        store: inmemory
-  chunk_idle_period: 5m
-  max_chunk_age: 1h
-  chunk_retain_period: 30s
-  max_transfer_retries: 0
+  wal:
+    enabled: true
+    dir: /loki/wal  # <--- subdirectory of /loki
 
 querier:
   engine:
@@ -26,13 +20,12 @@ query_range:
   cache_results: true
 
 limits_config:
-  max_cache_freshness_per_query: 10m
   reject_old_samples: true
   reject_old_samples_max_age: 168h
 
 schema_config:
   configs:
-    - from: 2022-01-01
+    - from: 2023-01-01
       store: boltdb-shipper
       object_store: filesystem
       schema: v12
@@ -45,6 +38,11 @@ storage_config:
     active_index_directory: /loki/index
     shared_store: filesystem
     cache_location: /loki/cache
-
   filesystem:
     directory: /loki/chunks
+
+compactor:
+  shared_store: filesystem
+  working_directory: /loki/compactor  # <--- also inside /loki
+  compaction_interval: 5m
+  retention_enabled: false

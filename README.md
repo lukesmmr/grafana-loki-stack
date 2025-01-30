@@ -130,9 +130,9 @@ You can either:
 
 - **Keep the Loki stack** separate, starting it manually:
   ```bash
-  docker-compose -f docker-compose.loki.yml up -d
+  docker compose -f docker-compose.loki.yml up -d
   ```
-- **Integrate** it into your existing Compose setup if you want a unified `docker-compose up -d`.
+- **Integrate** it into your existing Compose setup if you want a unified `docker compose up -d`.
 
 Just ensure that Promtail mounts the correct paths so it can read Caddy and Docker logs.
 
@@ -172,7 +172,7 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
   ```
   Look for ingestion or filesystem errors.
 
-- **Grafana**  
+- **Grafana**  doc
   If logs don’t appear:
   - Confirm Data Source is set to `http://loki:3100`.
   - Verify security group and firewall rules.
