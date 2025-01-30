@@ -9,8 +9,7 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-
-  # 1) Caddy logs
+  # Scrape caddy logs from local path
   - job_name: caddy_logs
     static_configs:
       - targets:
@@ -19,12 +18,14 @@ scrape_configs:
           job: caddy
           __path__: /var/log/caddy/*.log
 
-  # 2) Docker containers
+  # Scrape Docker containers
   - job_name: docker
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
         filters:
-          - label!=promtail  # skip promtail container logs if desired
+          - name: label
+            values: ["promtail"]
+            negative: true
     pipeline_stages:
       - docker:
           cri: false
