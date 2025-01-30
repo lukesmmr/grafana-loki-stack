@@ -25,7 +25,6 @@ scrape_configs:
         filters:
           - name: label
             values: ["promtail"]
-            negative: true
     pipeline_stages:
       - docker:
           cri: false
