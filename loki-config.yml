@@ -3,6 +3,7 @@ server:
   log_level: info
 
 distributor:
+  auth_enabled: false
   ring:
     kvstore:
       store: memberlist   # <--- Instead of consul
