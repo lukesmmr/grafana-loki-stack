@@ -75,7 +75,7 @@ function restart_stack() {
 # --- Function: status_stack ---
 function status_stack() {
   echo "Current status of the logging stack containers:"
-  docker compose ps
+  docker ps
 }
 
 # --- Main Command Logic ---
