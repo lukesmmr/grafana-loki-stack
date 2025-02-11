@@ -43,8 +43,7 @@ services:
     image: caddy:2
     container_name: grafana_reverse_proxy
     ports:
-      - "80:80"
-      - "443:443"
+      - "8443:443"  # Map host port 8443 to container's port 443
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
