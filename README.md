@@ -16,6 +16,7 @@ loki-stack/
 ├── docker-compose.loki.yml      # Main Docker Compose file for Loki, Promtail, Grafana
 ├── loki-config.yml         # Loki's configuration (in-memory ring, filesystem storage, etc.)
 ├── promtail-config.yml     # Promtail's configuration (scrape caddy logs + docker logs)
+├── Caddyfile               # Caddy's configuration for reverse proxy and SSL
 └── README.md               # This documentation
 ```
 
@@ -27,6 +28,8 @@ loki-stack/
    Reads logs from the host (Caddy, Docker) and ships them to Loki.  
 3. **Grafana** (`grafana/grafana`)  
    Provides a web UI for querying and visualizing logs.
+4. **Caddy** (`caddy`)  
+   Acts as a reverse proxy for Grafana, providing SSL and enhanced security.
 
 ---
 
@@ -110,7 +113,7 @@ This brings up **Loki**, **Promtail**, and **Grafana** in the background.
 
 ## 5. Using Grafana
 
-1. **Access** Grafana at `http://<EC2_PUBLIC_IP>:3000`.
+1. **Access** Grafana at `https://logs.numundo.org` or `https://logs.staging.numundo.org`.
 2. **Login** with `admin` / `admin` (you’ll be prompted to reset your password).
 3. Go to **Configuration → Data Sources → Add data source → Loki** and set URL to `http://loki:3100`.
 4. **Save & test**. If successful, you can **Explore** logs with LogQL queries.
@@ -143,7 +146,8 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
 1. **Secure Grafana**  
    - Restrict port `3000` in your EC2 Security Group.
    - Use strong admin credentials.
-   - Optionally put Grafana behind Caddy or another reverse proxy with TLS.
+   - **Caddy** provides SSL and acts as a reverse proxy with TLS.
+
 
 2. **Disk Space**  
    - Monitor `loki_data` usage.
@@ -172,15 +176,51 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
   ```
   Look for ingestion or filesystem errors.
 
-- **Grafana**  doc
+- **Grafana Logs**
   If logs don’t appear:
   - Confirm Data Source is set to `http://loki:3100`.
   - Verify security group and firewall rules.
   - Check logs in `docker logs grafana`.
 
+
+- **Caddy Logs**  
+  ```bash
+  docker logs grafana_reverse_proxy
+  ```
+  Look for ingestion or filesystem errors.
+
 ---
 
-## 9. License & Acknowledgments
+## 9. Managing the Logging Stack with the Manage Script
+
+This repository includes a handy shell script—`manage.sh`—that simplifies the routine operations of your logging stack (Loki, Promtail, Grafana, and Caddy). With a single command, you can start, stop, restart, or check the status of the entire stack.
+
+### 9.1 Overview
+
+The `manage.sh` script provides the following commands:
+
+- **start**: Launches all the services in the background using Docker Compose.
+- **stop**: Shuts down and removes the containers.
+- **restart**: Stops the stack, waits briefly for a graceful shutdown, then starts it up again.
+- **status**: Displays the current status of all the containers in the stack.
+
+### 9.2 Usage
+
+1. **Make the Script Executable:**
+
+   Before using the script, ensure it has executable permissions:
+
+   ```bash
+   chmod +x manage.sh
+
+2. **Running the Script**
+
+   * Start: `./manage_logging.sh start`
+   * Stop: `./manage_logging.sh stop`
+   * Restart: `./manage_logging.sh restart`
+   * Status: `./manage_logging.sh status`
+
+## 10. License & Acknowledgments
 
 - **Grafana Loki** is [Apache 2.0 licensed](https://github.com/grafana/loki).
 - **Promtail** and **Grafana** are also open source under permissive licenses.

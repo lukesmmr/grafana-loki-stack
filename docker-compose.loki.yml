@@ -6,15 +6,15 @@ services:
     volumes:
       - ./loki-config.yml:/etc/loki/config/loki-config.yml:ro
       - loki_data:/loki
-    ports:
-      - "3100:3100"
     restart: unless-stopped
+    networks:
+      - internal
+    # Note: Port mapping removed to prevent external access
 
   promtail:
     image: grafana/promtail:2.8.2
     container_name: promtail
     command: -config.file=/etc/promtail/config/promtail-config.yml
-    # Volumes to read logs from Caddy, Docker, etc.
     volumes:
       - ./promtail-config.yml:/etc/promtail/config/promtail-config.yml:ro
       - /var/log/caddy:/var/log/caddy:ro
@@ -24,19 +24,44 @@ services:
     depends_on:
       - loki
     restart: unless-stopped
+    networks:
+      - internal
 
   grafana:
     image: grafana/grafana:9.5.5
     container_name: grafana
-    ports:
-      - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
     depends_on:
       - loki
     restart: unless-stopped
+    networks:
+      - internal
+    # Direct host port exposure is intentionally omitted. Access Grafana only via the reverse proxy.
+
+  grafana_reverse_proxy:
+    image: caddy:2
+    container_name: grafana_reverse_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - grafana
+    restart: unless-stopped
+    networks:
+      - internal
 
 volumes:
   loki_data:
   grafana_data:
   promtail_positions:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge

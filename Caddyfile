@@ -1,0 +1,44 @@
+{
+    # Global options block.
+    # The email address is used for TLS certificate registration with Let's Encrypt.
+    email contact@numundo.org
+
+    # Uncomment to set debug mode if needed:
+    debug
+}
+
+
+logs.numundo.org, logs.staging.numundo.org {
+    reverse_proxy grafana:3000
+    
+    # Remove identifying headers from the response
+    header {
+        -Server
+        -X-Powered-By
+        -X-Grafana-Prod  # If Grafana happens to send any custom identifying headers.
+    }
+    
+    # Enable automatic HTTPS (default behavior) and force TLS protocols.
+    tls {
+        protocols tls1.2 tls1.3
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+
+    # Security Headers
+    header {
+        X-Content-Type-Options "nosniff"
+        Content-Security-Policy "default-src 'self'"
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/grafana_access.log {
+            roll_size 10mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+    }
+}
