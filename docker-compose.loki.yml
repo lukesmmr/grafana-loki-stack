@@ -19,20 +19,21 @@ services:
     networks:
       - internal
 
-  cadvisor:
-    image: google/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - "8080:8080"  # cAdvisor’s web UI (optional) on port 8080
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    restart: unless-stopped
-    networks:
-      - internal
+  # Commented out due to error: Failed to create a Container Manager: mountpoint for cpu not found
+  # cadvisor:
+  #   image: google/cadvisor:latest
+  #   container_name: cadvisor
+  #   ports:
+  #     - "8080:8080"  # cAdvisor’s web UI (optional) on port 8080
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #   restart: unless-stopped
+  #   networks:
+  #     - internal
 
   loki:
     image: grafana/loki:2.8.2
