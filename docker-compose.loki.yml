@@ -1,4 +1,38 @@
 services:
+  # Prometheus server to scrape metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - internal
+
+  # Node Exporter to collect host metrics
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - internal
+
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"  # cAdvisor’s web UI (optional) on port 8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+    networks:
+      - internal
+
   loki:
     image: grafana/loki:2.8.2
     container_name: loki
@@ -9,7 +43,6 @@ services:
     restart: unless-stopped
     networks:
       - internal
-    # Note: Port mapping removed to prevent external access
 
   promtail:
     image: grafana/promtail:2.8.2
@@ -37,13 +70,12 @@ services:
     restart: unless-stopped
     networks:
       - internal
-    # Direct host port exposure is intentionally omitted. Access Grafana only via the reverse proxy.
 
   grafana_reverse_proxy:
     image: caddy:2
     container_name: grafana_reverse_proxy
     ports:
-      - "8443:443"  # Map host port 8443 to container's port 443
+      - "8443:443"  # Access subdomain set in Caddyfile with port 8443 (using internal TLS)
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
