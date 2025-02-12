@@ -19,9 +19,7 @@ logs.staging.numundo.org {
     }
     
     # Enable automatic HTTPS (default behavior) and force TLS protocols.
-    tls {
-        protocols tls1.2 tls1.3
-    }
+    tls internal
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
