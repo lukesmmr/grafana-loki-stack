@@ -11,15 +11,6 @@ You’ll be able to **view** and **query** these logs through **Grafana** in a w
 
 ## 1. Repository Overview
 
-```
-loki-stack/
-├── docker-compose.loki.yml      # Main Docker Compose file for Loki, Promtail, Grafana
-├── loki-config.yml         # Loki's configuration (in-memory ring, filesystem storage, etc.)
-├── promtail-config.yml     # Promtail's configuration (scrape caddy logs + docker logs)
-├── Caddyfile               # Caddy's configuration for reverse proxy and SSL
-└── README.md               # This documentation
-```
-
 ### Services
 
 1. **Loki** (`grafana/loki`)  
@@ -28,7 +19,9 @@ loki-stack/
    Reads logs from the host (Caddy, Docker) and ships them to Loki.  
 3. **Grafana** (`grafana/grafana`)  
    Provides a web UI for querying and visualizing logs.
-4. **Caddy** (`caddy`)  
+4. **Prometheus** (`prom/prometheus`)  
+   Collects and stores metrics data for monitoring and alerting.
+5. **Caddy** (`caddy`)  
    Acts as a reverse proxy for Grafana, providing SSL and enhanced security.
 
 ---
@@ -38,8 +31,7 @@ loki-stack/
 - **EC2 instance** (Linux-based) with **Docker** already installed.
 - Proper **SSH** access to your EC2.
 - Security groups allowing inbound traffic on:
-  - **TCP 3000** (Grafana)  
-  - **TCP 3100** (if you need external log shippers to Loki; otherwise keep it internal)
+  - **TCP 8443** (Grafana)  
 - **Git** for pulling/pushing this repo to your instance.
 
 ---
@@ -54,6 +46,7 @@ cd loki-stack
 ```
 
 Feel free to customize the `.yml` files to your needs (ports, volume mounts, etc.).
+**Add your `.env` file configured with the `DOMAIN=example.com` that the service will be hosted on, using port 8443.**
 
 ### 3.2 Push to Your Remote Repository
 
@@ -83,7 +76,7 @@ cd loki-stack
 docker compose -f docker-compose.loki.yml up -d
 ```
 
-This brings up **Loki**, **Promtail**, and **Grafana** in the background.
+This brings up **Loki**, **Promtail**, **Prometheus** and **Grafana** in the background.
 
 ---
 
@@ -113,10 +106,11 @@ This brings up **Loki**, **Promtail**, and **Grafana** in the background.
 
 ## 5. Using Grafana
 
-1. **Access** Grafana at `https://logs.numundo.org` or `https://logs.staging.numundo.org`.
+1. **Access** Grafana at `https://YOUR-DOMAIN:8443`.
 2. **Login** with `admin` / `admin` (you’ll be prompted to reset your password).
 3. Go to **Configuration → Data Sources → Add data source → Loki** and set URL to `http://loki:3100`.
-4. **Save & test**. If successful, you can **Explore** logs with LogQL queries.
+4. Go to **Configuration → Data Sources → Add data source → Prometheus** and set URL to `http://prometheus:9090`.
+5. Import the **Node Exporter Full** dashboard template by navigating to **Create → Import** and entering the dashboard ID or JSON file.
 
 ---
 
@@ -147,7 +141,6 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
    - Restrict port `3000` in your EC2 Security Group.
    - Use strong admin credentials.
    - **Caddy** provides SSL and acts as a reverse proxy with TLS.
-
 
 2. **Disk Space**  
    - Monitor `loki_data` usage.
