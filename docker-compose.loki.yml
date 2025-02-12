@@ -84,6 +84,7 @@ services:
       - caddy_config:/config
     environment:
       - DOMAIN=${DOMAIN}
+      - EMAIL=${EMAIL}
     depends_on:
       - grafana
     restart: unless-stopped

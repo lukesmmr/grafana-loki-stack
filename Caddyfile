@@ -1,7 +1,7 @@
 {
     # Global options block.
     # The email address is used for TLS certificate registration with Let's Encrypt.
-    email contact@numundo.org
+    email ${EMAIL}
 
     # Uncomment to set debug mode if needed:
     debug
