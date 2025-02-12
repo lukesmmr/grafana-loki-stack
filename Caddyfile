@@ -28,7 +28,6 @@ logs.staging.numundo.org {
     # Security Headers
     header {
         X-Content-Type-Options "nosniff"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'"
     }
 
     # Logging
