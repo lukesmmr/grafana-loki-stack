@@ -8,7 +8,7 @@
 }
 
 
-logs.numundo.org:8443, logs.staging.numundo.org:8443 {
+logs.staging.numundo.org {
     reverse_proxy grafana:3000
     
     # Remove identifying headers from the response
