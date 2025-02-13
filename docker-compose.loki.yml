@@ -79,8 +79,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     environment:
-      - DOMAIN=${DOMAIN}
+      - DOMAIN_ROOT=${DOMAIN_ROOT}
       - EMAIL=${EMAIL}
+      - BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD}
     depends_on:
       - grafana
     restart: unless-stopped

@@ -46,7 +46,10 @@ cd loki-stack
 ```
 
 Feel free to customize the `.yml` files to your needs (ports, volume mounts, etc.).
-**Add your `.env` file configured with the `DOMAIN=example.com` that the service will be hosted on, using port 8443.**
+**Add your `.env` file configured with the following environment variables:**
+- `DOMAIN_ROOT=example.com` (the domain the service will be hosted on, using port 8443)
+- `EMAIL=your-email@example.com` (used for TLS certificate registration)
+- `BASIC_AUTH_PASSWORD=your-secure-password` (used for basic authentication)
 
 ### 3.2 Push to Your Remote Repository
 
