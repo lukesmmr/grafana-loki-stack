@@ -12,7 +12,7 @@ logs.${DOMAIN_ROOT} {
     reverse_proxy grafana:3000
     
     # Basic Authentication
-    basicauth / {
+    basic_auth / {
         admin {$BASIC_AUTH_PASSWORD}
     }
 
