@@ -46,7 +46,7 @@ cd loki-stack
 ```
 
 Feel free to customize the `.yml` files to your needs (ports, volume mounts, etc.).
-**Add your `.env` file configured with the following environment variables:**
+**Copy and rename the `.env.template` file to `.env` and fill it with the appropriate values for your environment:**
 - `DOMAIN_ROOT=example.com` (the domain the service will be hosted on, using port 8443)
 - `EMAIL=your-email@example.com` (used for TLS certificate registration)
 - `BASIC_AUTH_PASSWORD=your-secure-password` (used for basic authentication)
