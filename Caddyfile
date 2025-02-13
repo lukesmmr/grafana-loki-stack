@@ -1,19 +1,19 @@
 {
     # Global options block.
     # The email address is used for TLS certificate registration with Let's Encrypt.
-    email ${EMAIL}
+    email {$EMAIL}
 
     # Uncomment to set debug mode if needed:
     debug
 }
 
 
-logs.${DOMAIN_ROOT} {
+logs.{$DOMAIN_ROOT} {
     reverse_proxy grafana:3000
     
     # Basic Authentication
     basic_auth / {
-        admin ${BASIC_AUTH_PASSWORD}
+        admin {$BASIC_AUTH_PASSWORD}
     }
 
     # Remove identifying headers from the response
