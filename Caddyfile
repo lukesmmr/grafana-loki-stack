@@ -13,7 +13,7 @@ logs.${DOMAIN_ROOT} {
     
     # Basic Authentication
     basic_auth / {
-        admin {$BASIC_AUTH_PASSWORD}
+        admin ${BASIC_AUTH_PASSWORD}
     }
 
     # Remove identifying headers from the response
