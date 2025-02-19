@@ -7,7 +7,7 @@ positions:
 
 clients:
   - url: http://loki:3100/loki/api/v1/push
-    tenant_id: "numundo"
+    tenant_id: "default"
 
 scrape_configs:
   # Scrape caddy logs from local path
