@@ -11,8 +11,9 @@ scrape_configs:
   #     - targets: ["cadvisor:8080"]
 
   # Scrape external node_exporters specified via an environment variable.
-  # In your .env file you could set NODE_EXPORTER_CLIENTS to a comma-separated list, e.g.:
-  # NODE_EXPORTER_CLIENTS=10.0.0.1:9100, 10.0.0.2:9100
+  # Your .env file should contain NODE_EXPORTER_CLIENTS as a comma-separated list, e.g.:
+  # NODE_EXPORTER_CLIENTS=172.31.62.89:9100,10.0.0.1:9100
   - job_name: "node_exporter_external"
     static_configs:
-      - targets: ["${NODE_EXPORTER_CLIENTS}"]
+      - targets: 
+        - ${NODE_EXPORTER_CLIENTS}
