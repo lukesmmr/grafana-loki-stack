@@ -1,13 +1,15 @@
 services:
   # Prometheus server to scrape metrics
   prometheus:
-    build: ./prometheus
+    image: prom/prometheus:latest
     ports:
-      - "9100:9100"  # Expose Prometheus on its default port
+      - "9090:9090"  # Expose Prometheus on its default port
     volumes:
-      - ./prometheus/prometheus.yml.template:/etc/prometheus/prometheus.yml.template:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       - internal
+    environment:
+      - NODE_EXPORTER_CLIENT=${NODE_EXPORTER_CLIENT}
 
   # Node Exporter to collect host metrics
   node_exporter:
