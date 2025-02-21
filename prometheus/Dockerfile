@@ -1,5 +1,5 @@
 FROM prom/prometheus:latest
-RUN apk update && apk add --no-cache gettext
+RUN apt-get update && apt-get install -y gettext
 
 COPY prometheus.yml.template /etc/prometheus/prometheus.yml.template
 
