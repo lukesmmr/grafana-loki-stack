@@ -5,7 +5,7 @@ services:
     ports:
       - "9100:9100"  # Expose Prometheus on its default port
     volumes:
-      - ./prometheus.yml.template:/etc/prometheus/prometheus.yml.template:ro
+      - ./prometheus/prometheus.yml.template:/etc/prometheus/prometheus.yml.template:ro
     networks:
       - internal
 
