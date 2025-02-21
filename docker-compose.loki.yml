@@ -7,6 +7,10 @@ services:
       - "9100:9100"  # Expose Prometheus to receive metrics from remote node-exporters
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    # Use an entrypoint to substitute env variables into our Prometheus config file.
+    entrypoint: >
+      /bin/sh -c "envsubst < /etc/prometheus/prometheus.yml >
+      /etc/prometheus/prometheus.yml && exec prometheus --config.file=/etc/prometheus/prometheus.yml"
     networks:
       - internal
 
