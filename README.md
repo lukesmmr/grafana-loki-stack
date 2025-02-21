@@ -5,7 +5,14 @@ This repository sets up a **production-ready** log aggregation stack using **Gra
 - **Caddy** (located at `/var/log/caddy/access.log` and `/var/log/caddy/caddy.log`)
 - **Docker containers** (via Docker Service Discovery)
 
-You’ll be able to **view** and **query** these logs through **Grafana** in a web UI.
+You'll be able to **view** and **query** these logs through **Grafana** in a web UI.
+
+---
+
+## TODO
+
+- Ingest client promtail logs - refactor to multiple promtail streams
+- Ingest client docker logs via loki
 
 ---
 
@@ -96,7 +103,7 @@ This brings up **Loki**, **Promtail**, **Prometheus** and **Grafana** in the bac
 
 ### 4.2 `loki-config.yml`
 
-- Stores log data in `/loki` on the container’s filesystem (mapped to `loki_data`).
+- Stores log data in `/loki` on the container's filesystem (mapped to `loki_data`).
 - Uses an **in-memory ring** for discovery.
 
 ### 4.3 `promtail-config.yml`
@@ -110,7 +117,7 @@ This brings up **Loki**, **Promtail**, **Prometheus** and **Grafana** in the bac
 ## 5. Using Grafana
 
 1. **Access** Grafana at `https://YOUR-DOMAIN:8443`.
-2. **Login** with `admin` / `admin` (you’ll be prompted to reset your password).
+2. **Login** with `admin` / `admin` (you'll be prompted to reset your password).
 3. Go to **Configuration → Data Sources → Add data source → Loki** and set URL to `http://loki:3100`.
 4. Go to **Configuration → Data Sources → Add data source → Prometheus** and set URL to `http://prometheus:9090`.
 5. Import the **Node Exporter Full** dashboard template by navigating to **Create → Import** and entering the dashboard ID or JSON file.
@@ -154,7 +161,7 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
    - Consider object storage (S3, etc.) for large or long-term retention.
 
 4. **Scaling**  
-   - For high volumes, look into Loki’s distributed mode or external storage.
+   - For high volumes, look into Loki's distributed mode or external storage.
 
 ---
 
@@ -173,7 +180,7 @@ Just ensure that Promtail mounts the correct paths so it can read Caddy and Dock
   Look for ingestion or filesystem errors.
 
 - **Grafana Logs**
-  If logs don’t appear:
+  If logs don't appear:
   - Confirm Data Source is set to `http://loki:3100`.
   - Verify security group and firewall rules.
   - Check logs in `docker logs grafana`.
