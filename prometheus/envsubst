@@ -1,0 +1,6 @@
+#!/bin/sh
+# A simplistic envsubst implementation.
+# It reads from STDIN and writes to STDOUT with environment variables substituted.
+while IFS= read -r line; do
+    eval "echo \"$line\""
+done 

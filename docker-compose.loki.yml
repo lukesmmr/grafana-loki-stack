@@ -2,7 +2,6 @@ services:
   # Prometheus server to scrape metrics
   prometheus:
     build: ./prometheus
-    container_name: prometheus
     ports:
       - "9100:9100"  # Expose Prometheus on its default port
     volumes:
@@ -13,7 +12,6 @@ services:
   # Node Exporter to collect host metrics
   node_exporter:
     image: prom/node-exporter:latest
-    container_name: node_exporter
     networks:
       - internal
 
