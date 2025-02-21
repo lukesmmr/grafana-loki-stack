@@ -1,16 +1,12 @@
 services:
   # Prometheus server to scrape metrics
   prometheus:
-    image: prom/prometheus:latest
+    build: ./prometheus
     container_name: prometheus
     ports:
-      - "9100:9100"  # Expose Prometheus for receiving metrics
+      - "9100:9100"  # Expose Prometheus on its default port
     volumes:
       - ./prometheus.yml.template:/etc/prometheus/prometheus.yml.template:ro
-    # Generate a writable configuration file from the template and then run Prometheus.
-    entrypoint: >
-      /bin/sh -c "envsubst < /etc/prometheus/prometheus.yml.template >
-      /tmp/prometheus.yml && exec prometheus --config.file=/tmp/prometheus.yml"
     networks:
       - internal
 
