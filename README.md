@@ -230,3 +230,34 @@ The `manage.sh` script provides the following commands:
 
 Feel free to modify and use this stack in your own production or staging environments!
 
+---
+
+## 11. Security Hardening TODOs
+
+### Credentials & Access
+- **Enable basic auth** in Caddyfile (uncomment the section)
+- **Set strong Grafana password** during initial setup
+
+### Network & Container Security
+- **Restrict Loki port exposure** to internal network only (`127.0.0.1:3100:3100`)
+- **Add resource limits** to prevent container resource exhaustion
+- **Run containers as non-root** users where possible
+- **Avoid mounting Docker socket** directly (consider using Docker Socket Proxy)
+
+### Data Protection
+- **Enable retention policies** in loki-config.yml
+- **Use encrypted EBS volumes** for persistent data
+- **Implement regular backups** for log data
+
+### TLS & Headers
+- **Add security headers** to Caddy configuration:
+  ```
+  X-Frame-Options "DENY"
+  Content-Security-Policy "default-src 'self'"
+  Referrer-Policy "no-referrer-when-downgrade"
+  ```
+
+### Maintenance
+- **Regularly update container images** (no fixed versions, scan for vulnerabilities)
+- **Implement health checks** for all services
+- **Set up alerts** for monitoring system failures
