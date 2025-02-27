@@ -7,31 +7,34 @@
     debug
 }
 
-
 logs.{$DOMAIN_ROOT} {
-    reverse_proxy grafana:3000
+    # Grafana UI route
+    handle_path / {
+        reverse_proxy grafana:3000
+    }
     
-    # # Basic Authentication
-    # basic_auth / {
-    #     admin {$BASIC_AUTH_PASSWORD}
-    # }
+    # Loki API route for external Promtail clients
+    handle_path /loki/* {
+        reverse_proxy loki:3100
+        
+        # Optional: Add basic auth for Loki API
+        basic_auth {
+            {$LOKI_BASIC_AUTH_USER} {$LOKI_BASIC_AUTH_PW}
+        }
+    }
 
     # Remove identifying headers from the response
     header {
         -Server
         -X-Powered-By
-        -X-Grafana-Prod  # If Grafana happens to send any custom identifying headers.
+        -X-Grafana-Prod
     }
     
-    # Enable automatic HTTPS (default behavior) and force TLS protocols.
+    # Enable automatic HTTPS and force TLS protocols
     tls internal
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    }
-
-    # Security Headers
-    header {
         X-Content-Type-Options "nosniff"
     }
 

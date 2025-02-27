@@ -239,7 +239,6 @@ Feel free to modify and use this stack in your own production or staging environ
 - **Set strong Grafana password** during initial setup
 
 ### Network & Container Security
-- **Restrict Loki port exposure** to internal network only (`127.0.0.1:3100:3100`)
 - **Add resource limits** to prevent container resource exhaustion
 - **Run containers as non-root** users where possible
 - **Avoid mounting Docker socket** directly (consider using Docker Socket Proxy)
