@@ -30,8 +30,8 @@ logs.{$DOMAIN_ROOT} {
         -X-Grafana-Prod
     }
     
-    # Enable automatic HTTPS and force TLS protocols
-    tls internal
+    # Use Let's Encrypt
+    tls {$EMAIL}
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
