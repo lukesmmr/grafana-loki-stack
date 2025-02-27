@@ -235,7 +235,6 @@ Feel free to modify and use this stack in your own production or staging environ
 ## 11. Security Hardening TODOs
 
 ### Credentials & Access
-- **Enable basic auth** in Caddyfile (uncomment the section)
 - **Set strong Grafana password** during initial setup
 
 ### Network & Container Security
@@ -244,19 +243,10 @@ Feel free to modify and use this stack in your own production or staging environ
 - **Avoid mounting Docker socket** directly (consider using Docker Socket Proxy)
 
 ### Data Protection
-- **Enable retention policies** in loki-config.yml
 - **Use encrypted EBS volumes** for persistent data
 - **Implement regular backups** for log data
-
-### TLS & Headers
-- **Add security headers** to Caddy configuration:
-  ```
-  X-Frame-Options "DENY"
-  Content-Security-Policy "default-src 'self'"
-  Referrer-Policy "no-referrer-when-downgrade"
-  ```
 
 ### Maintenance
 - **Regularly update container images** (no fixed versions, scan for vulnerabilities)
 - **Implement health checks** for all services
-- **Set up alerts** for monitoring system failures
+- **Set up alerts** for monitoring system failures (e.g. SMTP Config for Grafana via .ini file)
