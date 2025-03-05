@@ -34,7 +34,7 @@ services:
           memory: 128M
 
   loki:
-    image: grafana/loki:2.8.2
+    image: grafana/loki:latest
     command: -config.file=/etc/loki/config/loki-config.yml
     ports:
       - "3100:3100"  # Expose Loki port for agent instances to push logs
@@ -52,7 +52,7 @@ services:
           memory: 512M
 
   promtail:
-    image: grafana/promtail:2.8.2
+    image: grafana/promtail:latest
     command: -config.file=/etc/promtail/config/promtail-config.yml
     volumes:
       - ./promtail-config.yml:/etc/promtail/config/promtail-config.yml:ro
@@ -73,7 +73,7 @@ services:
           memory: 256M
 
   grafana:
-    image: grafana/grafana:9.5.5
+    image: grafana/grafana:latest
     volumes:
       - grafana_data:/var/lib/grafana
     environment:
@@ -94,7 +94,7 @@ services:
           memory: 512M
 
   grafana_reverse_proxy:
-    image: caddy:2
+    image: caddy:latest
     ports:
       - "8443:443"  # Access subdomain set in Caddyfile with port 8443 (using internal TLS)
     volumes:
