@@ -7,43 +7,52 @@ services:
       - "9101:9101"
       - "9090:9090"
     volumes:
-      - ./prometheus.yml.template:/etc/prometheus/prometheus.yml.template:ro  # Mount the template file
+      - ./prometheus.yml.template:/etc/prometheus/prometheus.yml.template:ro
     networks:
       - internal
     environment:
-      - NODE_EXPORTER_CLIENT=${NODE_EXPORTER_CLIENT}
+      - NODE_EXPORTER_CLIENTS=${NODE_EXPORTER_CLIENTS}
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
   # Node Exporter to collect host metrics
   node_exporter:
     image: prom/node-exporter:latest
     networks:
       - internal
-
-  # Commented out due to error: Failed to create a Container Manager: mountpoint for cpu not found
-  # cadvisor:
-  #   image: google/cadvisor:latest
-  #   container_name: cadvisor
-  #   ports:
-  #     - "8080:8080"  # cAdvisor's web UI (optional) on port 8080
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:ro
-  #     - /sys:/sys:ro
-  #     - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #   restart: unless-stopped
-  #   networks:
-  #     - internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   loki:
     image: grafana/loki:2.8.2
     command: -config.file=/etc/loki/config/loki-config.yml
+    ports:
+      - "3100:3100"  # Expose Loki port for agent instances to push logs
     volumes:
       - ./loki-config.yml:/etc/loki/config/loki-config.yml:ro
       - loki_data:/loki
+    environment:
+      - LOKI_BASIC_AUTH_USER=${LOKI_BASIC_AUTH_USER}
+      - LOKI_BASIC_AUTH_PW=${LOKI_BASIC_AUTH_PW}
     restart: unless-stopped
     networks:
       - internal
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
   promtail:
     image: grafana/promtail:2.8.2
@@ -59,16 +68,33 @@ services:
     restart: unless-stopped
     networks:
       - internal
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   grafana:
     image: grafana/grafana:9.5.5
     volumes:
       - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default password, will be prompted to change
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_SERVER_ROOT_URL=https://logs.${DOMAIN_ROOT}:8443
+      - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
       - loki
     restart: unless-stopped
     networks:
       - internal
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
   grafana_reverse_proxy:
     image: caddy:2
@@ -81,13 +107,17 @@ services:
     environment:
       - DOMAIN_ROOT=${DOMAIN_ROOT}
       - EMAIL=${EMAIL}
-      - LOKI_BASIC_AUTH_USER=${LOKI_BASIC_AUTH_USER}
-      - LOKI_BASIC_AUTH_PW=${LOKI_BASIC_AUTH_PW}
     depends_on:
       - grafana
     restart: unless-stopped
     networks:
       - internal
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
 volumes:
   loki_data:

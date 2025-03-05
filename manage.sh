@@ -10,6 +10,11 @@
 #
 # This script assumes that your docker-compose.loki.yml file is in the same directory.
 # Ensure Docker and Docker Compose are installed and configured correctly.
+#
+# SECURITY NOTE:
+# Port 3100 (Loki) is exposed to receive logs from agent instances.
+# Ensure this port is ONLY accessible from your VPC private network,
+# never from the public internet. Use security groups to restrict access.
 
 set -e
 
@@ -50,6 +55,7 @@ COMPOSE_CMD="docker compose -f $DOCKER_COMPOSE_FILE"
 # --- Function: start_stack ---
 function start_stack() {
   echo "Starting the logging stack..."
+  echo "SECURITY REMINDER: Ensure port 3100 is only accessible from your VPC private network."
   $COMPOSE_CMD up -d
   if [ $? -eq 0 ]; then
     echo "Logging stack started successfully."

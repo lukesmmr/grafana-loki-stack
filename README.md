@@ -1,252 +1,126 @@
-# Loki Stack for Production on EC2
+# Grafana Loki Stack for Production on EC2
 
-This repository sets up a **production-ready** log aggregation stack using **Grafana Loki** on an EC2 instance with Docker. It collects logs from:
+A production-ready log aggregation stack using Grafana Loki on EC2 with Docker. Collects logs from:
+- Caddy logs
+- Docker containers (via Docker Service Discovery)
+- Multiple agent instances (via Loki push API)
 
-- **Caddy** (located at `/var/log/caddy/access.log` and `/var/log/caddy/caddy.log`)
-- **Docker containers** (via Docker Service Discovery)
+## Quick Start
 
-You'll be able to **view** and **query** these logs through **Grafana** in a web UI.
+For a complete setup on a fresh Ubuntu EC2 instance:
 
----
-
-## TODO
-
-- Ingest client promtail logs - refactor to multiple promtail streams
-- Ingest client docker logs via loki
-
----
-
-## 1. Repository Overview
-
-### Services
-
-1. **Loki** (`grafana/loki`)  
-   Stores and indexes log data.  
-2. **Promtail** (`grafana/promtail`)  
-   Reads logs from the host (Caddy, Docker) and ships them to Loki.  
-3. **Grafana** (`grafana/grafana`)  
-   Provides a web UI for querying and visualizing logs.
-4. **Prometheus** (`prom/prometheus`)  
-   Collects and stores metrics data for monitoring and alerting.
-5. **Caddy** (`caddy`)  
-   Acts as a reverse proxy for Grafana, providing SSL and enhanced security.
-
----
-
-## 2. Prerequisites
-
-- **EC2 instance** (Linux-based) with **Docker** already installed.
-- Proper **SSH** access to your EC2.
-- Security groups allowing inbound traffic on:
-  - **TCP 8443** (Grafana)  
-- **Git** for pulling/pushing this repo to your instance.
-
----
-
-## 3. Setup Instructions
-
-### 3.1 Clone This Repo on Your Local Machine
-
-```bash
-git clone <YOUR_REPO_URL> loki-stack
-cd loki-stack
-```
-
-Feel free to customize the `.yml` files to your needs (ports, volume mounts, etc.).
-**Copy and rename the `.env.template` file to `.env` and fill it with the appropriate values for your environment:**
-- `DOMAIN_ROOT=example.com` (the domain the service will be hosted on, using port 8443)
-- `EMAIL=your-email@example.com` (used for TLS certificate registration)
-- `BASIC_AUTH_PASSWORD=your-secure-password` (used for basic authentication)
-
-### 3.2 Push to Your Remote Repository
-
-If needed, initialize the repo, add a remote, and push:
-
-```bash
-git init
-git add .
-git commit -m "Add Loki stack configs"
-git remote add origin <YOUR_REPO_URL>
-git push -u origin main
-```
-
-### 3.3 On Your EC2 Staging/Production Box
-
-1. **SSH** into the EC2 instance.
-2. **Clone** or **pull** the repo:
-
-```bash
-git clone <YOUR_REPO_URL> loki-stack
-cd loki-stack
-```
-
-3. **Spin up the stack**:
-
-```bash
-docker compose -f docker-compose.loki.yml up -d
-```
-
-This brings up **Loki**, **Promtail**, **Prometheus** and **Grafana** in the background.
-
----
-
-## 4. File-by-File Explanation
-
-### 4.1 `docker-compose.loki.yml`
-
-- **Loki** listens on `3100`, storing data in `loki_data` volume.
-- **Promtail** reads logs:
-  - `/var/log/caddy` (mounted read-only)  
-  - Docker containers at `/var/lib/docker/containers`
-  - Docker socket `/var/run/docker.sock` for container discovery
-- **Grafana** on port `3000` with local data at `grafana_data`.
-
-### 4.2 `loki-config.yml`
-
-- Stores log data in `/loki` on the container's filesystem (mapped to `loki_data`).
-- Uses an **in-memory ring** for discovery.
-
-### 4.3 `promtail-config.yml`
-
-- **Scrape Caddy logs** under `/var/log/caddy/*.log`.  
-- **Scrape Docker logs** via Docker SD.  
-- Sends everything to `http://loki:3100`.
-
----
-
-## 5. Using Grafana
-
-1. **Access** Grafana at `https://YOUR-DOMAIN:8443`.
-2. **Login** with `admin` / `admin` (you'll be prompted to reset your password).
-3. Go to **Configuration → Data Sources → Add data source → Loki** and set URL to `http://loki:3100`.
-4. Go to **Configuration → Data Sources → Add data source → Prometheus** and set URL to `http://prometheus:9090`.
-5. Import the **Node Exporter Full** dashboard template by navigating to **Create → Import** and entering the dashboard ID or JSON file.
-
----
-
-## 6. Integrating with Your Deploy Script
-
-If you have a script like:
-
-```bash
-# ./deploy.sh staging|prod [logs]
-# ...
-```
-
-You can either:
-
-- **Keep the Loki stack** separate, starting it manually:
-  ```bash
-  docker compose -f docker-compose.loki.yml up -d
-  ```
-- **Integrate** it into your existing Compose setup if you want a unified `docker compose up -d`.
-
-Just ensure that Promtail mounts the correct paths so it can read Caddy and Docker logs.
-
----
-
-## 7. Production Considerations
-
-1. **Secure Grafana**  
-   - Restrict port `3000` in your EC2 Security Group.
-   - Use strong admin credentials.
-   - **Caddy** provides SSL and acts as a reverse proxy with TLS.
-
-2. **Disk Space**  
-   - Monitor `loki_data` usage.
-   - Rotate or prune old logs if limited storage.
-
-3. **Backups**  
-   - If logs are critical, back up the `loki_data` directory or the entire EC2 volume.
-   - Consider object storage (S3, etc.) for large or long-term retention.
-
-4. **Scaling**  
-   - For high volumes, look into Loki's distributed mode or external storage.
-
----
-
-## 8. Troubleshooting
-
-- **Promtail Logs**  
-  ```bash
-  docker logs promtail
-  ```
-  Check for file permission or mounting issues.
-
-- **Loki Logs**  
-  ```bash
-  docker logs loki
-  ```
-  Look for ingestion or filesystem errors.
-
-- **Grafana Logs**
-  If logs don't appear:
-  - Confirm Data Source is set to `http://loki:3100`.
-  - Verify security group and firewall rules.
-  - Check logs in `docker logs grafana`.
-
-
-- **Caddy Logs**  
-  ```bash
-  docker logs grafana_reverse_proxy
-  ```
-  Look for ingestion or filesystem errors.
-
----
-
-## 9. Managing the Logging Stack with the Manage Script
-
-This repository includes a handy shell script—`manage.sh`—that simplifies the routine operations of your logging stack (Loki, Promtail, Grafana, and Caddy). With a single command, you can start, stop, restart, or check the status of the entire stack.
-
-### 9.1 Overview
-
-The `manage.sh` script provides the following commands:
-
-- **start**: Launches all the services in the background using Docker Compose.
-- **stop**: Shuts down and removes the containers.
-- **restart**: Stops the stack, waits briefly for a graceful shutdown, then starts it up again.
-- **status**: Displays the current status of all the containers in the stack.
-
-### 9.2 Usage
-
-1. **Make the Script Executable:**
-
-   Before using the script, ensure it has executable permissions:
-
+1. SSH into your EC2 instance
+2. Clone this repository:
    ```bash
-   chmod +x manage.sh
+   git clone <YOUR_REPO_URL> grafana-loki
+   cd grafana-loki
+   ```
+3. Run the setup script:
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
 
-2. **Running the Script**
+## Installation Scripts
 
-   * Start: `./manage_logging.sh start`
-   * Stop: `./manage_logging.sh stop`
-   * Restart: `./manage_logging.sh restart`
-   * Status: `./manage_logging.sh status`
+This repository includes several scripts to simplify setup:
 
-## 10. License & Acknowledgments
+### `setup.sh` - Complete Setup Script
 
-- **Grafana Loki** is [Apache 2.0 licensed](https://github.com/grafana/loki).
-- **Promtail** and **Grafana** are also open source under permissive licenses.
+Runs all installation steps in sequence:
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-Feel free to modify and use this stack in your own production or staging environments!
+### `check_system.sh` - System Requirements Check
 
----
+Verifies your system meets the requirements:
+```bash
+chmod +x check_system.sh
+./check_system.sh
+```
 
-## 11. Security Hardening TODOs
+### `setup_env.sh` - Environment Setup Helper
 
-### Credentials & Access
-- **Set strong Grafana password** during initial setup
+Creates a properly configured `.env` file with bcrypt hashed passwords:
+```bash
+chmod +x setup_env.sh
+./setup_env.sh
+```
 
-### Network & Container Security
-- **Add resource limits** to prevent container resource exhaustion
-- **Run containers as non-root** users where possible
-- **Avoid mounting Docker socket** directly (consider using Docker Socket Proxy)
+### `install.sh` - Installation Script
 
-### Data Protection
-- **Use encrypted EBS volumes** for persistent data
-- **Implement regular backups** for log data
+Installs dependencies and prepares the system:
+```bash
+chmod +x install.sh
+sudo ./install.sh
+```
 
-### Maintenance
-- **Regularly update container images** (no fixed versions, scan for vulnerabilities)
-- **Implement health checks** for all services
-- **Set up alerts** for monitoring system failures (e.g. SMTP Config for Grafana via .ini file)
+### `manage.sh` - Management Script
+
+Manages the Grafana Loki stack:
+```bash
+./manage.sh {start|stop|restart|status}
+```
+
+## Environment Configuration
+
+Copy `.env.template` to `.env` and configure:
+- `DOMAIN_ROOT=example.com` (domain for accessing Grafana)
+- `EMAIL=your-email@example.com` (for Let's Encrypt)
+- `NODE_EXPORTER_CLIENTS=10.0.0.1:9100,10.0.0.2:9100` (comma-separated list of client IPs)
+- `LOKI_BASIC_AUTH_USER` and `LOKI_BASIC_AUTH_PW` (for agent authentication)
+
+## Stack Components
+
+1. **Loki** - Stores and indexes log data (port 3100)
+2. **Promtail** - Reads logs from the host and ships to Loki
+3. **Grafana** - Web UI for querying logs
+4. **Prometheus** - Collects metrics from multiple client instances
+5. **Caddy** - Reverse proxy for Grafana with SSL and enhanced security
+
+## Using Grafana
+
+1. Access Grafana at `https://logs.YOUR-DOMAIN:8443`
+2. Use `admin/admin` for initial Grafana login (you'll be prompted to reset)
+3. Configure data sources:
+   - Loki: `http://loki:3100`
+   - Prometheus: `http://prometheus:9090`
+
+## Agent Setup
+
+To configure agent instances to push logs:
+
+1. Install Promtail on each agent
+2. Configure to push logs to central Loki:
+   ```yaml
+   clients:
+     - url: http://CENTRAL_LOKI_PRIVATE_IP:3100/loki/api/v1/push
+       basic_auth:
+         username: your-loki-username
+         password: your-loki-password
+   ```
+
+## Security Considerations
+
+1. **Network Security**
+   - Restrict port 3100 (Loki) to your VPC private network only
+   - Configure security groups appropriately
+
+2. **Authentication**
+   - Use strong passwords for Loki authentication
+   - Rotate credentials regularly
+
+3. **TLS Encryption**
+   - Grafana UI uses HTTPS with Let's Encrypt
+   - Consider VPN for agent-to-Loki communication
+
+## Troubleshooting
+
+- **Promtail issues**: `docker logs promtail`
+- **Loki issues**: `docker logs loki`
+- **Grafana issues**: `docker logs grafana`
+- **Caddy issues**: `docker logs grafana_reverse_proxy`
+
+For detailed installation instructions, see [INSTALL.md](INSTALL.md).
