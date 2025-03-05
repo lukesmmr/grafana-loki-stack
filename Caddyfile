@@ -16,7 +16,8 @@ logs.{$DOMAIN_ROOT} {
             health_interval 30s
             
             # Timeouts
-            transport {
+            transport http {
+                tls_timeout 60s
                 dial_timeout 60s
                 response_header_timeout 60s
             }
