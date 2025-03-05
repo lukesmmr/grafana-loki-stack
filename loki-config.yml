@@ -30,7 +30,6 @@ ingester:
   chunk_idle_period: 5m
   max_chunk_age: 1h
   chunk_retain_period: 30s
-  max_transfer_retries: 0
 
 querier:
   engine:
@@ -40,7 +39,6 @@ query_range:
   cache_results: true
 
 compactor:
-  shared_store: filesystem
   working_directory: /loki/compactor
   compaction_interval: 10m
   retention_enabled: true
@@ -69,7 +67,6 @@ schema_config:
 storage_config:
   boltdb_shipper:
     active_index_directory: /loki/index
-    shared_store: filesystem
     cache_location: /loki/cache
   filesystem:
     directory: /loki/chunks
