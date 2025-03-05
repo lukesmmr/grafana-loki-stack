@@ -12,19 +12,18 @@ logs.{$DOMAIN_ROOT} {
     handle_path / {
         reverse_proxy grafana:3000 {
             # Health checks with explicit HTTP scheme
-            health_uri http://grafana:3000/api/health
+            health_uri /api/health
             health_interval 30s
             
-            # Timeouts
+            # Disable TLS for upstream connection (internal Docker network)
             transport http {
-                tls_timeout 60s
+                tls_insecure_skip_verify
                 dial_timeout 60s
                 response_header_timeout 60s
             }
             
             # Headers
             header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-Proto {scheme}
         }
     }
     
