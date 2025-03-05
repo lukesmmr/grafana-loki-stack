@@ -10,25 +10,23 @@
     debug
 }
 
-logs.{$DOMAIN_ROOT} {
+logs.{$DOMAIN_ROOT}:8443 {
     # Grafana UI route
-    handle_path / {
-        reverse_proxy * grafana:3000 {
-            # Health checks
-            health_uri /api/health
-            health_interval 30s
-            health_timeout 5s
-            
-            # Upstream configuration
-            lb_try_duration 1s
-            lb_try_interval 250ms
-            
-            # Transport configuration
-            transport http {
-                read_buffer 4096
-                write_buffer 4096
-                max_response_header 10240
-            }
+    reverse_proxy grafana:3000 {
+        # Health checks
+        health_uri /api/health
+        health_interval 30s
+        health_timeout 5s
+        
+        # Upstream configuration
+        lb_try_duration 1s
+        lb_try_interval 250ms
+        
+        # Transport configuration
+        transport http {
+            read_buffer 4096
+            write_buffer 4096
+            max_response_header 10240
         }
     }
     
@@ -38,12 +36,12 @@ logs.{$DOMAIN_ROOT} {
         -X-Powered-By
         -X-Grafana-Prod
         
-        # Security headers
+        # Security headers - less restrictive CSP
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
         X-XSS-Protection "1; mode=block"
-        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: blob:; connect-src 'self' ws: wss:;"
+        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval';"
         Referrer-Policy "strict-origin-when-cross-origin"
         Permissions-Policy "geolocation=(), microphone=(), camera=()"
     }
