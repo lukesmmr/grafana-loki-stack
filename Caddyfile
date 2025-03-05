@@ -12,11 +12,14 @@ logs.{$DOMAIN_ROOT} {
     handle_path / {
         reverse_proxy grafana:3000 {
             # Health checks
-            health_path /api/health
+            health_uri /api/health
             health_interval 30s
             
             # Timeouts
-            timeout 60s
+            transport {
+                dial_timeout 60s
+                response_header_timeout 60s
+            }
             
             # Headers
             header_up X-Real-IP {remote_host}
