@@ -142,19 +142,6 @@ if [ -f .env ]; then
   # Node Exporter configuration
   grep -q "NODE_EXPORTER_CLIENTS=" .env || missing_vars+=("NODE_EXPORTER_CLIENTS")
   
-  # Loki authentication (critical for agent log pushing)
-  if ! grep -q "LOKI_BASIC_AUTH_USER=" .env; then
-    missing_vars+=("LOKI_BASIC_AUTH_USER")
-  fi
-  if ! grep -q "LOKI_BASIC_AUTH_PW=" .env; then
-    missing_vars+=("LOKI_BASIC_AUTH_PW")
-  else
-    # Check if password is properly hashed (should contain $$)
-    if ! grep -q "LOKI_BASIC_AUTH_PW=\".*\$\$.*\"" .env; then
-      status "Loki password hash format is incorrect" "Password hash should contain doubled $ symbols ($$) for Docker Compose"
-    fi
-  fi
-  
   if [ ${#missing_vars[@]} -eq 0 ]; then
     status ".env file contains all required variables"
   else

@@ -35,15 +35,12 @@ services:
 
   loki:
     image: grafana/loki:2.8.2
-    command: -config.file=/etc/loki/config/loki-config.yml -config.expand-env=true
+    command: -config.file=/etc/loki/config/loki-config.yml
     ports:
       - "3100:3100"  # Expose Loki port for agent instances to push logs
     volumes:
       - ./loki-config.yml:/etc/loki/config/loki-config.yml:ro
       - loki_data:/loki
-    environment:
-      - LOKI_BASIC_AUTH_USER=${LOKI_BASIC_AUTH_USER}
-      - LOKI_BASIC_AUTH_PW=${LOKI_BASIC_AUTH_PW}
     restart: unless-stopped
     networks:
       - internal

@@ -2,7 +2,7 @@
 #
 # setup_env.sh - Helper script to set up environment variables for Grafana Loki Stack
 #
-# This script helps generate bcrypt hashed passwords and set up the .env file
+# This script helps set up the .env file for the Grafana Loki Stack
 #
 # Usage:
 #   chmod +x setup_env.sh
@@ -24,20 +24,19 @@ if [ -f .env ]; then
   fi
 fi
 
-# Check if python3 is installed
+# Check if python3 is installed for potential future use
 if ! command -v python3 &> /dev/null; then
-  echo "Python 3 is required for bcrypt password generation."
+  echo "Python 3 is required for some operations."
   read -p "Do you want to install Python 3 and pip? (y/n): " install_python
   if [[ "$install_python" == "y" || "$install_python" == "Y" ]]; then
     sudo apt-get update
     sudo apt-get install -y python3 python3-pip
   else
-    echo "Python 3 is required. Exiting."
-    exit 1
+    echo "Python 3 is recommended. Continuing anyway."
   fi
 fi
 
-# Install bcrypt if not already installed
+# Install bcrypt if not already installed - for Grafana password hashing
 if ! python3 -c "import bcrypt" &> /dev/null; then
   echo "Installing bcrypt Python package..."
   pip3 install bcrypt
@@ -58,12 +57,6 @@ read -p "Enter your email address (for Let's Encrypt): " email
 # Collect Node Exporter client information
 read -p "Enter comma-separated list of Node Exporter clients (e.g., 10.0.0.1:9100,10.0.0.2:9100): " node_exporter_clients
 
-# Collect Loki authentication information
-read -p "Enter username for Loki authentication: " loki_user
-read -sp "Enter password for Loki authentication: " loki_password
-echo ""
-loki_password_hash=$(generate_bcrypt_hash "$loki_password")
-
 # Collect Grafana authentication information
 read -p "Enter username for Grafana authentication: " grafana_user
 read -sp "Enter password for Grafana authentication: " grafana_password
@@ -75,15 +68,12 @@ cat > .env << EOF
 DOMAIN_ROOT=$domain_root
 EMAIL=$email
 NODE_EXPORTER_CLIENTS=$node_exporter_clients
-LOKI_BASIC_AUTH_USER=$loki_user
-LOKI_BASIC_AUTH_PW="$loki_password_hash"
 EOF
 
 echo ""
 echo "Environment file (.env) has been created successfully!"
 echo "You can now run the installation script: sudo ./install.sh"
 echo ""
-echo "Note: The bcrypt hashed passwords have been properly formatted for Docker Compose."
-echo "      The $ symbols have been doubled as required."
+echo "Note: Make sure to set up Grafana authentication through the UI after installation."
 
 exit 0

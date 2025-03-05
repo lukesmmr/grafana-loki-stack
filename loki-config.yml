@@ -1,7 +1,5 @@
 target: all  # crucial for single-process mode
 
-auth_enabled: true
-
 server:
   http_listen_port: 3100
   http_listen_address: 0.0.0.0  # listen on all interfaces

@@ -43,7 +43,7 @@ chmod +x check_system.sh
 
 ### `setup_env.sh` - Environment Setup Helper
 
-Creates a properly configured `.env` file with bcrypt hashed passwords:
+Creates a properly configured `.env` file:
 ```bash
 chmod +x setup_env.sh
 ./setup_env.sh
@@ -70,7 +70,6 @@ Copy `.env.template` to `.env` and configure:
 - `DOMAIN_ROOT=example.com` (domain for accessing Grafana)
 - `EMAIL=your-email@example.com` (for Let's Encrypt)
 - `NODE_EXPORTER_CLIENTS=10.0.0.1:9100,10.0.0.2:9100` (comma-separated list of client IPs)
-- `LOKI_BASIC_AUTH_USER` and `LOKI_BASIC_AUTH_PW` (for agent authentication)
 
 ## Stack Components
 
@@ -123,9 +122,6 @@ To configure agent instances to push logs:
    ```yaml
    clients:
      - url: http://CENTRAL_LOKI_PRIVATE_IP:3100/loki/api/v1/push
-       basic_auth:
-         username: your-loki-username
-         password: your-loki-password
    ```
 
 ## Security Considerations
@@ -136,8 +132,8 @@ To configure agent instances to push logs:
    - Port 80 should only be temporarily opened for initial SSL setup
 
 2. **Authentication**
-   - Use strong passwords for Loki authentication
-   - Rotate credentials regularly
+   - Use strong passwords for Grafana
+   - Consider implementing additional security measures like network-level restrictions
 
 3. **TLS Encryption**
    - Grafana UI uses HTTPS with Let's Encrypt/ZeroSSL
