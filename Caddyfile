@@ -2,9 +2,12 @@
     # Global options block.
     # The email address is used for TLS certificate registration with Let's Encrypt.
     email {$EMAIL}
-
+    
+    # Use ZeroSSL as the CA
+    acme_ca https://acme.zerossl.com/v2/DV90
+    
     # Enable debug mode for initial deployment, comment out in production
-    # debug
+    debug
 }
 
 logs.{$DOMAIN_ROOT} {
@@ -45,11 +48,14 @@ logs.{$DOMAIN_ROOT} {
         Permissions-Policy "geolocation=(), microphone=(), camera=()"
     }
     
-    # Use Let's Encrypt with OCSP stapling
+    # Use ZeroSSL with specific configuration
     tls {
         protocols tls1.2 tls1.3
         curves x25519
         alpn h2 http/1.1
+        issuer zerossl {
+            preferred_chains smallest
+        }
     }
 
     # Logging with rotation
