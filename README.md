@@ -80,6 +80,32 @@ Copy `.env.template` to `.env` and configure:
 4. **Prometheus** - Collects metrics from multiple client instances
 5. **Caddy** - Reverse proxy for Grafana with SSL and enhanced security
 
+## SSL Certificate Setup
+
+The stack uses Caddy for automatic SSL certificate management. For initial certificate acquisition:
+
+1. **Initial Certificate Setup**
+   ```bash
+   # Stop the Caddy container
+   docker stop loki-stack-grafana_reverse_proxy-1
+   
+   # Run temporary Caddy instance for certificate acquisition
+   docker compose -f docker-compose.loki.yml run --rm -p 80:80 grafana_reverse_proxy caddy run --config /etc/caddy/Caddyfile
+   ```
+   - Wait until you see "certificate obtained successfully" in the logs
+   - Press Ctrl+C to stop the temporary container
+   - Restart the stack with `docker compose -f docker-compose.loki.yml up -d`
+
+2. **Why This Approach?**
+   - Avoids permanently exposing port 80
+   - Only temporarily opens port 80 for initial certificate acquisition
+   - Subsequent renewals happen over port 443
+
+3. **Certificate Renewal**
+   - Automatic renewal happens over port 443
+   - No manual intervention needed
+   - Caddy handles all renewal processes
+
 ## Using Grafana
 
 1. Access Grafana at `https://logs.YOUR-DOMAIN:8443`
@@ -107,20 +133,33 @@ To configure agent instances to push logs:
 1. **Network Security**
    - Restrict port 3100 (Loki) to your VPC private network only
    - Configure security groups appropriately
+   - Port 80 should only be temporarily opened for initial SSL setup
 
 2. **Authentication**
    - Use strong passwords for Loki authentication
    - Rotate credentials regularly
 
 3. **TLS Encryption**
-   - Grafana UI uses HTTPS with Let's Encrypt
+   - Grafana UI uses HTTPS with Let's Encrypt/ZeroSSL
    - Consider VPN for agent-to-Loki communication
 
 ## Troubleshooting
 
-- **Promtail issues**: `docker logs promtail`
-- **Loki issues**: `docker logs loki`
-- **Grafana issues**: `docker logs grafana`
-- **Caddy issues**: `docker logs grafana_reverse_proxy`
+### Common Issues
+
+1. **SSL Certificate Issues**
+   - Check if port 80 is accessible during initial setup
+   - Verify domain DNS points to your server
+   - Check Caddy logs: `docker logs loki-stack-grafana_reverse_proxy-1`
+
+2. **Component Issues**
+   - Promtail issues: `docker logs loki-stack-grafana_promtail-1`
+   - Loki issues: `docker logs loki-stack-loki-1`
+   - Grafana issues: `docker logs loki-stack-grafana-1`
+
+3. **Stack Management**
+   - Full stack restart: `docker compose -f docker-compose.loki.yml restart`
+   - Check stack status: `docker compose -f docker-compose.loki.yml ps`
+   - View all logs: `docker compose -f docker-compose.loki.yml logs -f`
 
 For detailed installation instructions, see [INSTALL.md](INSTALL.md).
