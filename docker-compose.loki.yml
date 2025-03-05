@@ -104,6 +104,8 @@ services:
     environment:
       - DOMAIN_ROOT=${DOMAIN_ROOT}
       - EMAIL=${EMAIL}
+      - BASIC_AUTH_USERNAME=${BASIC_AUTH_USERNAME:-admin}
+      - BASIC_AUTH_PASSWORD_HASH=${BASIC_AUTH_PASSWORD_HASH}
     depends_on:
       - grafana
     restart: unless-stopped
