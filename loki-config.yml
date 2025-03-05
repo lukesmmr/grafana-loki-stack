@@ -6,13 +6,16 @@ server:
   http_listen_port: 3100
   http_listen_address: 0.0.0.0  # listen on all interfaces
   log_level: info
-
-# Basic auth configuration
-auth:
-  type: basic
-  basic:
-    username: ${LOKI_BASIC_AUTH_USER}
-    password: ${LOKI_BASIC_AUTH_PW}
+  http_server_read_timeout: 300s
+  http_server_write_timeout: 300s
+  grpc_server_max_recv_msg_size: 67108864
+  grpc_server_max_send_msg_size: 67108864
+  # Basic auth configuration
+  auth:
+    type: basic
+    basic:
+      username: ${LOKI_BASIC_AUTH_USER}
+      password: ${LOKI_BASIC_AUTH_PW}
 
 common:
   path_prefix: /loki
