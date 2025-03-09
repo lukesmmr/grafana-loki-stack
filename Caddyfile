@@ -8,6 +8,16 @@
     
     # Enable debug mode for initial deployment
     debug
+    
+    # Caddy's own operations log with rotation and compression
+    log {
+        output file /var/log/caddy/caddy.log {
+        roll_size 10MB
+        roll_keep 5
+        roll_keep_for 720h
+        }
+        format json
+    }
 }
 
 logs.{$DOMAIN_ROOT} {
@@ -58,12 +68,38 @@ logs.{$DOMAIN_ROOT} {
 
     # Logging with rotation
     log {
-        output file /var/log/caddy/grafana_access.log {
+        output file /var/log/caddy/access.log {
             roll_size 10mb
             roll_keep 5
             roll_keep_for 720h
         }
-        format json
-        level INFO
+        format filter {
+            wrap console
+            fields {
+                # Keep User-Agent, Accept-Language, Host, and Referer but remove other headers
+                request>headers>Accept delete
+                request>headers>Accept-Encoding delete
+                request>headers>Cache-Control delete
+                request>headers>Connection delete
+                request>headers>Cookie delete
+                request>headers>Dnt delete
+                request>headers>Priority delete
+                request>headers>Sec-Ch-Ua delete
+                request>headers>Sec-Ch-Ua-Mobile delete
+                request>headers>Sec-Ch-Ua-Platform delete
+                request>headers>Sec-Fetch-Dest delete
+                request>headers>Sec-Fetch-Mode delete
+                request>headers>Sec-Fetch-Site delete
+                request>headers>Sec-Gpc delete
+                # Remove all response headers (including CSP)
+                resp_headers delete
+                # Remove redundant TLS info
+                tls>server_name delete
+                tls>resumed delete
+                tls>version delete
+                tls>cipher_suite delete
+                tls>proto delete
+            }
+        }
     }
 }
