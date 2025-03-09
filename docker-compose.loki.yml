@@ -56,7 +56,7 @@ services:
     command: -config.file=/etc/promtail/config/promtail-config.yml
     volumes:
       - ./promtail-config.yml:/etc/promtail/config/promtail-config.yml:ro
-      - /var/log/caddy:/var/log/caddy:ro
+      - caddy_logs:/var/log/caddy:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - promtail_positions:/tmp
@@ -101,6 +101,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+      - caddy_logs:/var/log/caddy
     environment:
       - DOMAIN_ROOT=${DOMAIN_ROOT}
       - EMAIL=${EMAIL}
@@ -124,6 +125,7 @@ volumes:
   promtail_positions:
   caddy_data:
   caddy_config:
+  caddy_logs:
 
 networks:
   internal:
