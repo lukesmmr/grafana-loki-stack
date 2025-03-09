@@ -59,11 +59,17 @@ scrape_configs:
         target_label: 'job'
         replacement: 'caddy'
       
-      # For non-Caddy containers, set job as docker
+      # For non-Caddy containers, set default job as docker
       - source_labels: ['__meta_docker_container_name']
-        regex: '(?!.*grafana_reverse_proxy).*'
+        regex: '.*'
         target_label: 'job'
         replacement: 'docker'
+      
+      # Override job=docker with job=caddy for Caddy containers
+      - source_labels: ['__meta_docker_container_name']
+        regex: '.*grafana_reverse_proxy.*'
+        target_label: 'job'
+        replacement: 'caddy'
       
       # Add container name as a label
       - source_labels: ['__meta_docker_container_name']
