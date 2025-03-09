@@ -3,35 +3,49 @@
 set -e
 
 # Parse the NODE_EXPORTER_CLIENTS environment variable
-# Convert comma-separated list to JSON array format for Prometheus
+# Format: ip:port:nodename,ip:port:nodename
 if [ -n "$NODE_EXPORTER_CLIENTS" ]; then
-  # Process the comma-separated list into a JSON array format
+  # Process the comma-separated list
   # First, replace commas with spaces
   CLIENTS=$(echo "$NODE_EXPORTER_CLIENTS" | tr ',' ' ')
   
-  # Initialize the JSON array
-  JSON_ARRAY="["
+  # Initialize the node mappings JSON array
+  echo "[" > /etc/prometheus/node_mappings.json
+  FIRST_MAPPING=true
   
   # Process each client
   for CLIENT in $CLIENTS; do
-    # Add quotes around each client and a comma after (except for the last one)
-    if [ "$JSON_ARRAY" = "[" ]; then
-      JSON_ARRAY="$JSON_ARRAY\"$CLIENT\""
+    # Split the client string by colon
+    IP_PORT=$(echo "$CLIENT" | cut -d':' -f1-2)
+    NODENAME=$(echo "$CLIENT" | cut -d':' -f3)
+    IP=$(echo "$IP_PORT" | cut -d':' -f1)
+    
+    # Add to node mappings JSON file
+    if [ "$FIRST_MAPPING" = "true" ]; then
+      echo "  {" >> /etc/prometheus/node_mappings.json
+      FIRST_MAPPING=false
     else
-      JSON_ARRAY="$JSON_ARRAY, \"$CLIENT\""
+      echo "  }, {" >> /etc/prometheus/node_mappings.json
     fi
+    echo "    \"targets\": [\"$IP_PORT\"]," >> /etc/prometheus/node_mappings.json
+    echo "    \"labels\": {" >> /etc/prometheus/node_mappings.json
+    echo "      \"nodename\": \"$NODENAME\"," >> /etc/prometheus/node_mappings.json
+    echo "      \"ip\": \"$IP\"" >> /etc/prometheus/node_mappings.json
+    echo "    }" >> /etc/prometheus/node_mappings.json
   done
   
-  # Close the JSON array
-  JSON_ARRAY="$JSON_ARRAY]"
+  # Close the node mappings JSON file
+  if [ "$FIRST_MAPPING" = "false" ]; then
+    echo "  }" >> /etc/prometheus/node_mappings.json
+  fi
+  echo "]" >> /etc/prometheus/node_mappings.json
 else
   # Default empty array if no clients specified
-  JSON_ARRAY="[]"
+  echo "[]" > /etc/prometheus/node_mappings.json
 fi
 
-# Create the final prometheus.yml by replacing the placeholder
-# Using sed for the substitution
-sed "s|\${NODE_EXPORTER_CLIENTS}|$JSON_ARRAY|g" /etc/prometheus/prometheus.yml.template > /etc/prometheus/prometheus.yml
+# Copy the prometheus.yml template to the final location
+cp /etc/prometheus/prometheus.yml.template /etc/prometheus/prometheus.yml
 
 # Start Prometheus with the generated configuration file
 exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml "$@"

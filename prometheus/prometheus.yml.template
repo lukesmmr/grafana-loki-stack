@@ -7,9 +7,15 @@ scrape_configs:
     static_configs:
       - targets: ["node_exporter:9100"]
 
-  # Scrape external node_exporters specified via environment variable
-  # The NODE_EXPORTER_CLIENT environment variable is passed in via docker-compose
-  # Format: comma-separated list of IPs with ports (e.g., "10.0.0.1:9100,10.0.0.2:9100")
+  # Scrape external node_exporters with custom node names
+  # Format in .env: ip:port:nodename,ip:port:nodename
   - job_name: "node_exporter_external"
-    static_configs:
-      - targets: ${NODE_EXPORTER_CLIENTS}
+    file_sd_configs:
+      - files:
+        - /etc/prometheus/node_mappings.json
+        refresh_interval: 5m
+    
+    # Use the nodename label as the instance label
+    relabel_configs:
+      - source_labels: ['nodename']
+        target_label: 'instance'

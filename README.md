@@ -69,7 +69,26 @@ Manages the Grafana Loki stack:
 Copy `.env.template` to `.env` and configure:
 - `DOMAIN_ROOT=example.com` (domain for accessing Grafana)
 - `EMAIL=your-email@example.com` (for Let's Encrypt)
-- `NODE_EXPORTER_CLIENTS=10.0.0.1:9100,10.0.0.2:9100` (comma-separated list of client IPs)
+- `NODE_EXPORTER_CLIENTS=10.0.0.1:9100:node-1,10.0.0.2:9100:node-2` (comma-separated list of client IPs with custom node names)
+
+### Node Exporter Configuration
+
+The `NODE_EXPORTER_CLIENTS` variable uses the following format:
+```
+ip:port:nodename,ip:port:nodename,...
+```
+
+For example:
+```
+NODE_EXPORTER_CLIENTS=10.0.0.1:9100:node-1,10.0.0.2:9100:node-2
+```
+
+This format allows you to:
+- Specify the IP and port for each node_exporter instance
+- Assign a custom node name that will appear in Prometheus and Grafana
+- Easily identify your servers in metrics and dashboards
+
+The system automatically generates the necessary Prometheus configuration to use these custom node names as instance labels.
 
 ## Stack Components
 

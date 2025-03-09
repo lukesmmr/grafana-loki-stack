@@ -43,7 +43,7 @@ read -p "Enter your domain root (e.g., example.com): " domain_root
 read -p "Enter your email address (for Let's Encrypt): " email
 
 # Collect Node Exporter client information
-read -p "Enter comma-separated list of Node Exporter clients (e.g., 10.0.0.1:9100,10.0.0.2:9100): " node_exporter_clients
+read -p "Enter comma-separated list of Node Exporter clients (format: ip:port:nodename, e.g., 10.0.0.1:9100:node-1,10.0.0.2:9100:node-2): " node_exporter_clients
 
 # Collect Basic Auth information
 read -p "Enter username for Basic Authentication [admin]: " basic_auth_username
