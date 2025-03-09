@@ -25,10 +25,17 @@ scrape_configs:
             msg: msg
             request: request
             status: status
-      - labels:
-          log_type:
-            # Dynamically set log type based on filename
-            expression: '`/var/log/caddy/access.log` in __filename__ ? "access" : "operations"'
+      # Set log type based on filename pattern
+      - match:
+          selector: '{__filename__=~".*/access\\.log"}'
+          stages:
+            - labels:
+                log_type: access
+      - match:
+          selector: '{__filename__=~".*/caddy\\.log"}'
+          stages:
+            - labels:
+                log_type: operations
 
   # Scrape Docker containers with specific handling for Caddy
   - job_name: docker
