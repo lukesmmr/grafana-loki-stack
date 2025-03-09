@@ -2,6 +2,9 @@
 
 set -e
 
+# Ensure data directory exists
+mkdir -p /etc/prometheus/data
+
 # Parse the NODE_EXPORTER_CLIENTS environment variable
 # Format: ip:port:nodename,ip:port:nodename
 if [ -n "$NODE_EXPORTER_CLIENTS" ]; then
@@ -10,7 +13,7 @@ if [ -n "$NODE_EXPORTER_CLIENTS" ]; then
   CLIENTS=$(echo "$NODE_EXPORTER_CLIENTS" | tr ',' ' ')
   
   # Initialize the node mappings JSON array
-  echo "[" > /etc/prometheus/node_mappings.json
+  echo "[" > /etc/prometheus/data/node_mappings.json
   FIRST_MAPPING=true
   
   # Process each client
@@ -22,26 +25,30 @@ if [ -n "$NODE_EXPORTER_CLIENTS" ]; then
     
     # Add to node mappings JSON file
     if [ "$FIRST_MAPPING" = "true" ]; then
-      echo "  {" >> /etc/prometheus/node_mappings.json
+      echo "  {" >> /etc/prometheus/data/node_mappings.json
       FIRST_MAPPING=false
     else
-      echo "  }, {" >> /etc/prometheus/node_mappings.json
+      echo "  }, {" >> /etc/prometheus/data/node_mappings.json
     fi
-    echo "    \"targets\": [\"$IP_PORT\"]," >> /etc/prometheus/node_mappings.json
-    echo "    \"labels\": {" >> /etc/prometheus/node_mappings.json
-    echo "      \"nodename\": \"$NODENAME\"," >> /etc/prometheus/node_mappings.json
-    echo "      \"ip\": \"$IP\"" >> /etc/prometheus/node_mappings.json
-    echo "    }" >> /etc/prometheus/node_mappings.json
+    echo "    \"targets\": [\"$IP_PORT\"]," >> /etc/prometheus/data/node_mappings.json
+    echo "    \"labels\": {" >> /etc/prometheus/data/node_mappings.json
+    echo "      \"nodename\": \"$NODENAME\"," >> /etc/prometheus/data/node_mappings.json
+    echo "      \"ip\": \"$IP\"" >> /etc/prometheus/data/node_mappings.json
+    echo "    }" >> /etc/prometheus/data/node_mappings.json
   done
   
   # Close the node mappings JSON file
   if [ "$FIRST_MAPPING" = "false" ]; then
-    echo "  }" >> /etc/prometheus/node_mappings.json
+    echo "  }" >> /etc/prometheus/data/node_mappings.json
   fi
-  echo "]" >> /etc/prometheus/node_mappings.json
+  echo "]" >> /etc/prometheus/data/node_mappings.json
+
+  # Create a symlink for backward compatibility
+  ln -sf /etc/prometheus/data/node_mappings.json /etc/prometheus/node_mappings.json
 else
   # Default empty array if no clients specified
-  echo "[]" > /etc/prometheus/node_mappings.json
+  echo "[]" > /etc/prometheus/data/node_mappings.json
+  ln -sf /etc/prometheus/data/node_mappings.json /etc/prometheus/node_mappings.json
 fi
 
 # Copy the prometheus.yml template to the final location

@@ -90,6 +90,42 @@ This format allows you to:
 
 The system automatically generates the necessary Prometheus configuration to use these custom node names as instance labels.
 
+#### Verifying Node Mappings
+
+To verify that your node mappings are correctly configured:
+
+1. Access the Prometheus container:
+   ```bash
+   docker exec -it loki-stack-prometheus-1 sh
+   ```
+
+2. Check the node mappings file:
+   ```bash
+   cat /etc/prometheus/data/node_mappings.json
+   ```
+
+3. You should see a JSON file with your node mappings:
+   ```json
+   [
+     {
+       "targets": ["10.0.0.1:9100"],
+       "labels": {
+         "nodename": "node-1",
+         "ip": "10.0.0.1"
+       }
+     },
+     {
+       "targets": ["10.0.0.2:9100"],
+       "labels": {
+         "nodename": "node-2",
+         "ip": "10.0.0.2"
+       }
+     }
+   ]
+   ```
+
+4. In Grafana, your nodes will appear with these custom names in metrics and dashboards.
+
 ## Stack Components
 
 1. **Loki** - Stores and indexes log data (port 3100)
